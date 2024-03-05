@@ -1,9 +1,9 @@
 from flask import jsonify, request, Response
 from http import HTTPStatus
-from app.models import User
+from app.models import User, Post
 
 from app import app  # ссылка на объект с названием app, созданный в __init__
-from app import USERS
+from app import USERS, POSTS
 
 
 @app.route('/')
@@ -32,3 +32,22 @@ def get_user(user_id):
     user = USERS[user_id]
     return jsonify(id=user.id, first_name=user.firstName, last_name=user.lastName, email=user.email,
                    total_reactions=user.totalReactions, posts=user.posts)
+
+
+@app.post('/posts/create')
+def create_post():
+    author_id = request.json.get('author_id')
+    text = request.json.get('text')
+    if 0 <= author_id < len(USERS):
+        post = Post(len(POSTS), author_id, text)
+        USERS[author_id].posts.append(post.id)
+        POSTS.append(post)
+        return jsonify(id=post.id, author_id=post.author_id, text=post.text, reactions=post.reactions)
+    return Response(status=HTTPStatus.BAD_REQUEST)
+
+
+@app.route('/posts/<int:post_id>')
+def get_post(post_id):
+    if 0 <= post_id < len(POSTS):
+        return Response(status=HTTPStatus.OK)
+    return Response(status=HTTPStatus.BAD_REQUEST)
