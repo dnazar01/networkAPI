@@ -45,9 +45,9 @@ def create_post():
         return jsonify(id=post.id, author_id=post.author_id, text=post.text, reactions=post.reactions)
     return Response(status=HTTPStatus.BAD_REQUEST)
 
-
 @app.route('/posts/<int:post_id>')
 def get_post(post_id):
-    if 0 <= post_id < len(POSTS):
-        return Response(status=HTTPStatus.OK)
+    if 0<=post_id < len(POSTS):
+        post = POSTS[post_id]
+        return jsonify(id=post.id, author_id=post.author_id, text=post.text, reactions=post.reactions)
     return Response(status=HTTPStatus.BAD_REQUEST)
