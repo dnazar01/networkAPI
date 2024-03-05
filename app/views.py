@@ -45,9 +45,21 @@ def create_post():
         return jsonify(id=post.id, author_id=post.author_id, text=post.text, reactions=post.reactions)
     return Response(status=HTTPStatus.BAD_REQUEST)
 
+
 @app.route('/posts/<int:post_id>')
 def get_post(post_id):
-    if 0<=post_id < len(POSTS):
+    if 0 <= post_id < len(POSTS):
         post = POSTS[post_id]
         return jsonify(id=post.id, author_id=post.author_id, text=post.text, reactions=post.reactions)
+    return Response(status=HTTPStatus.BAD_REQUEST)
+
+
+@app.post('/posts/<int:post_id>/reaction')
+def post_reaction(post_id):
+    user_id = request.json.get('user_id')
+    reaction = request.json.get('reaction')
+    if 0 <= user_id < len(USERS) and 0 <= post_id < len(POSTS):  # maybe not int
+        POSTS[post_id].reactions.append(reaction) # может быть ссылка на разные объекты постов и они из-за этого не синхронятся
+        USERS[user_id].totalReactions += 1 # обновили счетчик ректов
+        return Response(status=HTTPStatus.OK)
     return Response(status=HTTPStatus.BAD_REQUEST)
