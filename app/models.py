@@ -1,8 +1,11 @@
 import re
+from app import USERS
 
 
 class User:
-    def __init__(self, id, first_name, last_name, email, total_reactions=0, posts=[]):
+    def __init__(self, id, first_name, last_name, email, total_reactions=0, posts=None):
+        if posts is None:
+            posts = []
         self.id = id
         self.firstName = first_name
         self.lastName = last_name
@@ -13,8 +16,6 @@ class User:
     @staticmethod
     def is_email_valid(email):
         pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
-
-        # Check if the email matches the pattern
         if re.match(pattern, email):
             return True
         else:
@@ -22,8 +23,12 @@ class User:
 
 
 class Post:
-    def __init__(self, id, author_id, text, reactions=[]):
-        self.id = id
+    def __init__(self, post_id, author_id, text):
+        self.post_id = post_id
         self.author_id = author_id
         self.text = text
-        self.reactions = reactions
+        self.reactions = []
+
+    def add_reaction(self, reaction):
+        self.reactions.append(reaction)
+        USERS[self.author_id].totalReactions += 1

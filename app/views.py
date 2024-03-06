@@ -1,9 +1,9 @@
 from flask import jsonify, request, Response
 from http import HTTPStatus
-from app.models import User, Post
 
 from app import app  # ссылка на объект с названием app, созданный в __init__
 from app import USERS, POSTS
+from app.models import User, Post
 
 
 @app.route('/')
@@ -19,7 +19,6 @@ def create_user():
     if User.is_email_valid(email):
         user = User(len(USERS), first_name, last_name, email)
         USERS.append(user)
-        # todo check email for validity
         return jsonify(id=user.id, first_name=user.firstName, last_name=user.lastName, email=user.email,
                        total_reactions=user.totalReactions, posts=user.posts)
     return Response(status=HTTPStatus.BAD_REQUEST)
@@ -40,9 +39,9 @@ def create_post():
     text = request.json.get('text')
     if 0 <= author_id < len(USERS):
         post = Post(len(POSTS), author_id, text)
-        USERS[author_id].posts.append(post.id)
+        USERS[author_id].posts.append(post.post_id)
         POSTS.append(post)
-        return jsonify(id=post.id, author_id=post.author_id, text=post.text, reactions=post.reactions)
+        return jsonify(id=post.post_id, author_id=post.author_id, text=post.text, reactions=post.reactions)
     return Response(status=HTTPStatus.BAD_REQUEST)
 
 
@@ -50,7 +49,7 @@ def create_post():
 def get_post(post_id):
     if 0 <= post_id < len(POSTS):
         post = POSTS[post_id]
-        return jsonify(id=post.id, author_id=post.author_id, text=post.text, reactions=post.reactions)
+        return jsonify(id=post.post_id, author_id=post.author_id, text=post.text, reactions=post.reactions)
     return Response(status=HTTPStatus.BAD_REQUEST)
 
 
@@ -58,8 +57,8 @@ def get_post(post_id):
 def post_reaction(post_id):
     user_id = request.json.get('user_id')
     reaction = request.json.get('reaction')
-    if 0 <= user_id < len(USERS) and 0 <= post_id < len(POSTS):  # maybe not int
-        POSTS[post_id].reactions.append(reaction) # может быть ссылка на разные объекты постов и они из-за этого не синхронятся
-        USERS[user_id].totalReactions += 1 # обновили счетчик ректов
+    if 0 <= user_id < len(USERS) and 0 <= post_id < len(POSTS):
+        post = POSTS[post_id]
+        post.add_reaction(reaction)
         return Response(status=HTTPStatus.OK)
     return Response(status=HTTPStatus.BAD_REQUEST)
