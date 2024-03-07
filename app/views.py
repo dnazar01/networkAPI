@@ -26,11 +26,13 @@ def create_user():
 
 @app.route('/users/<int:user_id>')
 def get_user(user_id):
-    if user_id < 0 or user_id >= len(USERS):
-        return Response(status=HTTPStatus.BAD_REQUEST)
-    user = USERS[user_id]
-    return jsonify(id=user.id, first_name=user.firstName, last_name=user.lastName, email=user.email,
-                   total_reactions=user.totalReactions, posts=user.posts)
+    if 0 <= user_id < len(USERS):
+        user = USERS[user_id]
+        return jsonify(id=user.id, first_name=user.firstName, last_name=user.lastName, email=user.email,
+                       total_reactions=user.totalReactions, posts=user.posts)
+    return Response(status=HTTPStatus.BAD_REQUEST)
+
+
 
 
 @app.post('/posts/create')
@@ -49,7 +51,7 @@ def create_post():
 def get_post(post_id):
     if 0 <= post_id < len(POSTS):
         post = POSTS[post_id]
-        return jsonify(id=post.post_id, author_id=post.author_id, text=post.text, reactions=post.reactions)
+        return jsonify(post.to_text())
     return Response(status=HTTPStatus.BAD_REQUEST)
 
 
@@ -61,4 +63,18 @@ def post_reaction(post_id):
         post = POSTS[post_id]
         post.add_reaction(reaction)
         return Response(status=HTTPStatus.OK)
+    return Response(status=HTTPStatus.BAD_REQUEST)
+
+
+@app.route('/users/<int:user_id>/posts')
+def get_user_posts_sorted(user_id):
+    sort_type = request.json.get('sort')  # asc/desc
+    if 0 <= user_id < len(USERS):
+        user = USERS[user_id]  # check validity
+        user_posts = [POSTS[post_id].to_text() for post_id in user.posts]
+        user_posts = sorted(user_posts, key=lambda post: len(post["reactions"]))
+        if sort_type == 'asc':
+            return jsonify(posts=user_posts)
+        if sort_type == 'desc':
+            return jsonify(posts=user_posts[::-1])
     return Response(status=HTTPStatus.BAD_REQUEST)

@@ -1,5 +1,5 @@
 import re
-from app import USERS
+from app import USERS, POSTS
 
 
 class User:
@@ -32,3 +32,11 @@ class Post:
     def add_reaction(self, reaction):
         self.reactions.append(reaction)
         USERS[self.author_id].totalReactions += 1
+
+    def to_text(self):
+        return {
+            "id": self.post_id,
+            "author_id": self.author_id,
+            "text": self.text,
+            "reactions": self.reactions
+        }
