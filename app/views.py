@@ -1,9 +1,11 @@
 from flask import jsonify, request, Response
 from http import HTTPStatus
+import matplotlib.pyplot as plt
 
 from app import app  # ссылка на объект с названием app, созданный в __init__
 from app import USERS, POSTS
 from app.models import User, Post
+
 
 @app.route("/")
 def index():
@@ -133,4 +135,26 @@ def get_users_leaderboard():
             return jsonify(users=leaderboard_list)
         if sort_type == "desc":
             return jsonify(users=leaderboard_list[::-1])
+    if output_data_type == "graph":
+        leaderboard_list = [
+            {
+                "id": user.id,
+                "first_name": user.firstName,
+                "last_name": user.lastName,
+                "total_reactions": user.totalReactions,
+            }
+            for user in USERS
+        ]
+        fig, ax = plt.subplots()
+
+        users = [f"{user['first_name']} {user['last_name']} ({user['id']})" for user in leaderboard_list]
+        reacts = [user['total_reactions'] for user in leaderboard_list]
+
+        ax.bar(users, reacts)
+
+        ax.set_ylabel('User score')
+        ax.set_title('User leaderboard by reactions')
+
+        plt.savefig('app/static/images/leaderboard.png')
+        return Response('<img src="static/images/leaderboard.png">', status=HTTPStatus.OK, mimetype="text/html")
     return Response(status=HTTPStatus.BAD_REQUEST)
