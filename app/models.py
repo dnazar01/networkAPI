@@ -15,7 +15,7 @@ class User:
 
     @staticmethod
     def is_email_valid(email):
-        pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         if re.match(pattern, email):
             return True
         else:
@@ -32,11 +32,3 @@ class Post:
     def add_reaction(self, reaction):
         self.reactions.append(reaction)
         USERS[self.author_id].totalReactions += 1
-
-    def to_text(self):
-        return {
-            "id": self.post_id,
-            "author_id": self.author_id,
-            "text": self.text,
-            "reactions": self.reactions
-        }

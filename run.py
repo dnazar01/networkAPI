@@ -2,5 +2,3 @@ from app import app  # ссылка на объект с названием app,
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
