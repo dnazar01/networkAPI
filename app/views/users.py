@@ -1,7 +1,7 @@
 from flask import jsonify, request, Response
 from http import HTTPStatus
 import matplotlib.pyplot as plt
-from app import app, USERS
+from app import app, USERS, POSTS
 from app.models import User
 
 
@@ -26,7 +26,7 @@ def create_user():
 
 @app.route("/users/<int:user_id>")
 def get_user(user_id):
-    if 0 <= user_id < len(USERS):
+    if User.is_valid_id(user_id):
         user = USERS[user_id]
         return jsonify(
             id=user.id,
@@ -52,7 +52,7 @@ def get_users_leaderboard():
                 "email": user.email,
                 "total_reactions": user.totalReactions,
             }
-            for user in USERS
+            for user in USERS if User.is_valid_id(user.id)
         ]
         leaderboard_list.sort(key=lambda user: user["total_reactions"])
         if sort_type == "asc":
@@ -67,7 +67,7 @@ def get_users_leaderboard():
                 "last_name": user.lastName,
                 "total_reactions": user.totalReactions,
             }
-            for user in USERS
+            for user in USERS if User.is_valid_id(user.id)
         ]
         fig, ax = plt.subplots()
 
@@ -81,4 +81,21 @@ def get_users_leaderboard():
 
         plt.savefig('app/static/images/leaderboard.png')
         return Response('<img src="static/images/leaderboard.png">', status=HTTPStatus.OK, mimetype="text/html")
+    return Response(status=HTTPStatus.BAD_REQUEST)
+
+
+@app.delete("/users/<int:user_id>")
+def delete_user(user_id):
+    if User.is_valid_id(user_id):
+        user = USERS[user_id]
+        user.status = "deleted"
+        return jsonify(
+            id=user.id,
+            first_name=user.firstName,
+            last_name=user.lastName,
+            email=user.email,
+            total_reactions=user.totalReactions,
+            posts=user.posts,
+            status=user.status,
+        )
     return Response(status=HTTPStatus.BAD_REQUEST)

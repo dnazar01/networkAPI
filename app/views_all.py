@@ -4,4 +4,4 @@ from app import USERS, POSTS
 
 @app.route("/")
 def index():
-    return f"<h1>Hello World!</h1><br>{USERS}</br><br>{POSTS}</br>"
+    return f"<h1>Hello World!</h1><br>USERS = {USERS}</br><br>POSTS = {POSTS}</br>"

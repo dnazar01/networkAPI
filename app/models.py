@@ -12,6 +12,7 @@ class User:
         self.email = email
         self.totalReactions = total_reactions
         self.posts = posts
+        self.status = "created"
 
     @staticmethod
     def is_email_valid(email):
@@ -21,6 +22,10 @@ class User:
         else:
             return False
 
+    @staticmethod
+    def is_valid_id(user_id):
+        return 0 <= user_id < len(USERS) and USERS[user_id].status != "deleted"
+
 
 class Post:
     def __init__(self, post_id, author_id, text):
@@ -28,6 +33,7 @@ class Post:
         self.author_id = author_id
         self.text = text
         self.reactions = []
+        self.status = "created"
 
     def add_reaction(self, reaction):
         self.reactions.append(reaction)

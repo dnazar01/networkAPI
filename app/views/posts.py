@@ -1,14 +1,14 @@
 from flask import jsonify, request, Response
 from http import HTTPStatus
 from app import app, USERS, POSTS
-from app.models import Post
+from app.models import Post, User
 
 
 @app.post("/posts/create")
 def create_post():
     author_id = request.json.get("author_id")
     text = request.json.get("text")
-    if 0 <= author_id < len(USERS):
+    if User.is_valid_id(author_id):
         post = Post(len(POSTS), author_id, text)
         USERS[author_id].posts.append(post.post_id)
         POSTS.append(post)
@@ -38,16 +38,17 @@ def get_post(post_id):
 def post_reaction(post_id):
     user_id = request.json.get("user_id")
     reaction = request.json.get("reaction")
-    if 0 <= user_id < len(USERS) and 0 <= post_id < len(POSTS):
+    if User.is_valid_id(user_id) and 0 <= post_id < len(POSTS):
         post = POSTS[post_id]
         post.add_reaction(reaction)
         return Response(status=HTTPStatus.OK)
     return Response(status=HTTPStatus.BAD_REQUEST)
 
+
 @app.route("/users/<int:user_id>/posts")
-def get_user_posts_sorted(user_id):
+def get_all_user_posts(user_id):
     sort_type = request.json.get("sort")  # asc/desc
-    if 0 <= user_id < len(USERS):
+    if User.is_valid_id(user_id):
         user = USERS[
             user_id
         ]  # check validity # создаем новый массив, ссылаемся на POSTS
@@ -70,3 +71,4 @@ def get_user_posts_sorted(user_id):
         if sort_type == "desc":
             return jsonify(posts=user_posts[::-1])
     return Response(status=HTTPStatus.BAD_REQUEST)
+
