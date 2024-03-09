@@ -38,3 +38,7 @@ class Post:
     def add_reaction(self, reaction):
         self.reactions.append(reaction)
         USERS[self.author_id].totalReactions += 1
+
+    @staticmethod
+    def is_valid_id(post_id):
+        return 0 <= post_id < len(POSTS) and POSTS[post_id].status != "deleted"

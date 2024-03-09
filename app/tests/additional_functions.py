@@ -11,3 +11,10 @@ def create_user_payload():
         "last_name": "Gubkin",
         "email": "test@mail.ru"
     }
+
+
+def create_reaction_payload():
+    return {
+        "user_id": 0,
+        "reaction": "boom"
+    }

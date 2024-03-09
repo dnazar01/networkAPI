@@ -23,7 +23,7 @@ def create_post():
 
 @app.route("/posts/<int:post_id>")
 def get_post(post_id):
-    if 0 <= post_id < len(POSTS):
+    if Post.is_valid_id(post_id):
         post = POSTS[post_id]
         return jsonify(
             id=post.post_id,
@@ -38,7 +38,7 @@ def get_post(post_id):
 def post_reaction(post_id):
     user_id = request.json.get("user_id")
     reaction = request.json.get("reaction")
-    if User.is_valid_id(user_id) and 0 <= post_id < len(POSTS):
+    if User.is_valid_id(user_id) and Post.is_valid_id(post_id):
         post = POSTS[post_id]
         post.add_reaction(reaction)
         return Response(status=HTTPStatus.OK)
@@ -72,3 +72,17 @@ def get_all_user_posts(user_id):
             return jsonify(posts=user_posts[::-1])
     return Response(status=HTTPStatus.BAD_REQUEST)
 
+
+@app.delete("/posts/<int:post_id>")
+def delete_post(post_id):
+    if Post.is_valid_id(post_id):
+        post = POSTS[post_id]
+        post.status = "deleted"
+        return jsonify(
+            id=post.post_id,
+            author_id=post.author_id,
+            text=post.text,
+            reactions=post.reactions,
+            status=post.status
+        )
+    return Response(status=HTTPStatus.BAD_REQUEST)
