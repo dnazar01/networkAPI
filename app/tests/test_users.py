@@ -1,4 +1,4 @@
-import requests
+import requests, re
 from http import HTTPStatus
 from additional_functions import create_user_payload
 
@@ -56,3 +56,19 @@ def test_create_users_leaderboard_list():
     for user_id in test_users:
         delete_response = requests.delete(f"{ENDPOINT}/users/{user_id}")
         assert delete_response.status_code == HTTPStatus.OK
+
+
+def test_create_users_leaderboard_graph():
+    # создаем запрос на граф
+    payload = {"type": "graph"}
+    created_response = requests.get(f"{ENDPOINT}/users/leaderboard", json=payload)
+    assert created_response.status_code == HTTPStatus.OK
+
+    # проверка того, соответствует ли строка ответа нашим ожиданиям
+    pattern = r'<img\s+src="([^"]+)"'
+    assert re.match(pattern, created_response.text)
+
+    # не включаем '<img src=" и ">, проверка, что по такому адресу можно перейти и график появился
+    path = created_response.text[10:-2]
+    get_response = requests.get(f"{ENDPOINT}/{path}")
+    assert get_response.status_code == HTTPStatus.OK

@@ -147,7 +147,7 @@ def test_all_posts():
     # ожидаемый массив после сортировки это [n,n-2,n+1] -> [n-2, n, n+1]
     # cравниваем ожидания с реальностью, сортировка по возрастанию
     payload = {
-        "sort": "asc"
+        "sort": "desc"
     }
     created_response = requests.get(f"{ENDPOINT}/users/{user_id}/posts", json=payload)
     assert created_response.status_code == HTTPStatus.OK
@@ -157,7 +157,7 @@ def test_all_posts():
 
     # сразу проверяем по нужному количеству реакций
     expected = [n - 2, n, n + 1]
-    assert result_of_sort == expected
+    assert result_of_sort == (expected if payload['sort'] == 'asc' else expected[::-1])
 
     # удалили все посты
     for post_id in all_posts_id:
