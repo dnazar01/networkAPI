@@ -83,6 +83,6 @@ def delete_post(post_id):
             author_id=post.author_id,
             text=post.text,
             reactions=post.reactions,
-            status=post.status
+            status=post.status,
         )
     return Response(status=HTTPStatus.BAD_REQUEST)

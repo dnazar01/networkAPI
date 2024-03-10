@@ -2,7 +2,7 @@ import requests, re
 from http import HTTPStatus
 from additional_functions import create_user_payload
 
-ENDPOINT = 'http://127.0.0.1:5000'
+ENDPOINT = "http://127.0.0.1:5000"
 
 
 def test_create_get_user():
@@ -12,22 +12,22 @@ def test_create_get_user():
     assert created_response.status_code == HTTPStatus.OK
 
     # проверяем что пользователь корректно создался
-    assert created_response.json()['first_name'] == payload['first_name']
-    assert created_response.json()['last_name'] == payload['last_name']
-    assert created_response.json()['email'] == payload['email']
+    assert created_response.json()["first_name"] == payload["first_name"]
+    assert created_response.json()["last_name"] == payload["last_name"]
+    assert created_response.json()["email"] == payload["email"]
 
     # проверяем что пользователя можно достать через /users/id
-    user_id = created_response.json()['id']
+    user_id = created_response.json()["id"]
     get_response = requests.get(f"{ENDPOINT}/users/{user_id}")
-    assert get_response.json()['first_name'] == payload['first_name']
-    assert get_response.json()['last_name'] == payload['last_name']
-    assert get_response.json()['email'] == payload['email']
+    assert get_response.json()["first_name"] == payload["first_name"]
+    assert get_response.json()["last_name"] == payload["last_name"]
+    assert get_response.json()["email"] == payload["email"]
 
     # удаляем и поверяем что нам вернулась нужная информация
     delete_response = requests.delete(f"{ENDPOINT}/users/{user_id}")
-    assert delete_response.json()['first_name'] == payload['first_name']
-    assert delete_response.json()['last_name'] == payload['last_name']
-    assert delete_response.json()['status'] == 'deleted'
+    assert delete_response.json()["first_name"] == payload["first_name"]
+    assert delete_response.json()["last_name"] == payload["last_name"]
+    assert delete_response.json()["status"] == "deleted"
 
 
 def test_create_user_with_wrong_data():
@@ -45,7 +45,7 @@ def test_create_users_leaderboard_list():
         payload = create_user_payload()
         created_response = requests.post(f"{ENDPOINT}/users/create", json=payload)
         assert created_response.status_code == HTTPStatus.OK
-        test_users.append(created_response.json()['id'])
+        test_users.append(created_response.json()["id"])
 
     payload = {"type": "list", "sort": "asc"}
     get_response = requests.get(f"{ENDPOINT}/users/leaderboard", json=payload)
