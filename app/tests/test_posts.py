@@ -109,29 +109,42 @@ def test_all_posts():
     assert created_response.status_code == HTTPStatus.OK
 
     user_id = created_response.json()['id']
-    post_ids = []
-
-    # создали 3 поста
+    all_posts_id = []  # храним все айди созданных постов
     for _ in range(3):
         payload_for_post = create_post_payload()
         payload_for_post['author_id'] = user_id
         created_response = requests.post(f"{ENDPOINT}/posts/create", json=payload_for_post)
         assert created_response.status_code == HTTPStatus.OK
-        post_ids.append(created_response.json()['id'])
+        all_posts_id.append(created_response.json()['id'])
 
-    # запостили по реакту на каждый пост
-    for id in post_ids:
+    # запускаем везде нужное количество реакций
+    n = 5
+
+    # на первый пост n реакции
+    post_id = all_posts_id[0]
+    for _ in range(n):
         payload = create_reaction_payload()
         payload['user_id'] = user_id
-        created_response = requests.post(f"{ENDPOINT}/posts/{id}/reaction", json=payload)
+        created_response = requests.post(f"{ENDPOINT}/posts/{post_id}/reaction", json=payload)
         assert created_response.status_code == HTTPStatus.OK
 
-    # запостили реакт на второй пост
-    payload = create_reaction_payload()
-    payload['user_id'] = user_id
-    created_response = requests.post(f"{ENDPOINT}/posts/{post_ids[1]}/reaction", json=payload)
-    assert created_response.status_code == HTTPStatus.OK
+    # на второй пост n-2 реакция
+    post_id = all_posts_id[1]
+    for _ in range(n - 2):
+        payload = create_reaction_payload()
+        payload['user_id'] = user_id
+        created_response = requests.post(f"{ENDPOINT}/posts/{post_id}/reaction", json=payload)
+        assert created_response.status_code == HTTPStatus.OK
 
+    # на третий пост n+1 реакции
+    post_id = all_posts_id[2]
+    for _ in range(n + 1):
+        payload = create_reaction_payload()
+        payload['user_id'] = user_id
+        created_response = requests.post(f"{ENDPOINT}/posts/{post_id}/reaction", json=payload)
+        assert created_response.status_code == HTTPStatus.OK
+
+    # ожидаемый массив после сортировки это [n,n-2,n+1] -> [n-2, n, n+1]
     # cравниваем ожидания с реальностью, сортировка по возрастанию
     payload = {
         "sort": "asc"
@@ -139,7 +152,18 @@ def test_all_posts():
     created_response = requests.get(f"{ENDPOINT}/users/{user_id}/posts", json=payload)
     assert created_response.status_code == HTTPStatus.OK
     assert isinstance(created_response.json()["posts"], list)
+
     result_of_sort = [len(post["reactions"]) for post in created_response.json()['posts']]
+
     # сразу проверяем по нужному количеству реакций
-    expected = [1, 1, 2]
+    expected = [n - 2, n, n + 1]
     assert result_of_sort == expected
+
+    # удалили все посты
+    for post_id in all_posts_id:
+        delete_response = requests.delete(f"{ENDPOINT}/posts/{post_id}")
+        assert delete_response.status_code == HTTPStatus.OK
+
+    # удалили пользователя
+    delete_response = requests.delete(f"{ENDPOINT}/users/{user_id}")
+    assert delete_response.status_code == HTTPStatus.OK

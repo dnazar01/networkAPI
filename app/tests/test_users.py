@@ -38,7 +38,7 @@ def test_create_user_with_wrong_data():
     assert created_response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_create_users_leaderboard():
+def test_create_users_leaderboard_list():
     n = 3
     test_users = []
     for _ in range(n):
