@@ -7,10 +7,10 @@ class User:
         if posts is None:
             posts = []
         self.id = id
-        self.firstName = first_name
-        self.lastName = last_name
+        self.first_name = first_name
+        self.last_name = last_name
         self.email = email
-        self.totalReactions = total_reactions
+        self.total_reactions = total_reactions
         self.posts = posts
         self.status = "created"
 
@@ -37,7 +37,7 @@ class Post:
 
     def add_reaction(self, reaction):
         self.reactions.append(reaction)
-        USERS[self.author_id].totalReactions += 1
+        USERS[self.author_id].total_reactions += 1
 
     @staticmethod
     def is_valid_id(post_id):

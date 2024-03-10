@@ -15,10 +15,10 @@ def create_user():
         USERS.append(user)
         return jsonify(
             id=user.id,
-            first_name=user.firstName,
-            last_name=user.lastName,
+            first_name=user.first_name,
+            last_name=user.last_name,
             email=user.email,
-            total_reactions=user.totalReactions,
+            total_reactions=user.total_reactions,
             posts=user.posts,
         )
     return Response(status=HTTPStatus.BAD_REQUEST)
@@ -30,10 +30,10 @@ def get_user(user_id):
         user = USERS[user_id]
         return jsonify(
             id=user.id,
-            first_name=user.firstName,
-            last_name=user.lastName,
+            first_name=user.first_name,
+            last_name=user.last_name,
             email=user.email,
-            total_reactions=user.totalReactions,
+            total_reactions=user.total_reactions,
             posts=user.posts,
         )
     return Response(status=HTTPStatus.BAD_REQUEST)
@@ -47,10 +47,10 @@ def get_users_leaderboard():
         leaderboard_list = [
             {
                 "id": user.id,
-                "first_name": user.firstName,
-                "last_name": user.lastName,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
                 "email": user.email,
-                "total_reactions": user.totalReactions,
+                "total_reactions": user.total_reactions,
             }
             for user in USERS
             if User.is_valid_id(user.id)
@@ -64,9 +64,9 @@ def get_users_leaderboard():
         leaderboard_list = [
             {
                 "id": user.id,
-                "first_name": user.firstName,
-                "last_name": user.lastName,
-                "total_reactions": user.totalReactions,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "total_reactions": user.total_reactions,
             }
             for user in USERS
             if User.is_valid_id(user.id)
@@ -100,10 +100,10 @@ def delete_user(user_id):
         user.status = "deleted"
         return jsonify(
             id=user.id,
-            first_name=user.firstName,
-            last_name=user.lastName,
+            first_name=user.first_name,
+            last_name=user.last_name,
             email=user.email,
-            total_reactions=user.totalReactions,
+            total_reactions=user.total_reactions,
             posts=user.posts,
             status=user.status,
         )
