@@ -2,6 +2,7 @@ from flask import jsonify, request, Response
 from http import HTTPStatus
 from app import app, USERS, POSTS
 from app.models import Post, User
+from app.enum_classes import Status, SortType
 
 
 @app.post("/posts/create")
@@ -66,9 +67,9 @@ def get_all_user_posts(user_id):
         user_posts.sort(
             key=lambda post: len(post["reactions"])
         )  # создаем новый массив, версию старого сортированного по реакциям
-        if sort_type == "asc":
+        if sort_type == SortType.ASCENDING.value:
             return jsonify(posts=user_posts)
-        if sort_type == "desc":
+        if sort_type == SortType.DESCENDING.value:
             return jsonify(posts=user_posts[::-1])
     return Response(status=HTTPStatus.BAD_REQUEST)
 
@@ -77,7 +78,7 @@ def get_all_user_posts(user_id):
 def delete_post(post_id):
     if Post.is_valid_id(post_id):
         post = POSTS[post_id]
-        post.status = "deleted"
+        post.status = Status.DELETED.value
         return jsonify(
             id=post.post_id,
             author_id=post.author_id,

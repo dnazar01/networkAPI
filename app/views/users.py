@@ -3,6 +3,7 @@ from http import HTTPStatus
 import matplotlib.pyplot as plt
 from app import app, USERS, POSTS
 from app.models import User
+from app.enum_classes import Status, SortType
 
 
 @app.post("/users/create")
@@ -56,9 +57,9 @@ def get_users_leaderboard():
             if User.is_valid_id(user.id)
         ]
         leaderboard_list.sort(key=lambda user: user["total_reactions"])
-        if sort_type == "asc":
+        if sort_type == SortType.ASCENDING.value:
             return jsonify(users=leaderboard_list)
-        if sort_type == "desc":
+        if sort_type == SortType.DESCENDING.value:
             return jsonify(users=leaderboard_list[::-1])
     if output_data_type == "graph":
         leaderboard_list = [
@@ -97,7 +98,7 @@ def get_users_leaderboard():
 def delete_user(user_id):
     if User.is_valid_id(user_id):
         user = USERS[user_id]
-        user.status = "deleted"
+        user.status = Status.DELETED.value
         return jsonify(
             id=user.id,
             first_name=user.first_name,
