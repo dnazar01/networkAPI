@@ -20,7 +20,9 @@ class User:
 
     @staticmethod
     def is_valid_id(user_id):
-        return 0 <= user_id < len(USERS) and USERS[user_id].status != Status.DELETED.value
+        return (
+            0 <= user_id < len(USERS) and USERS[user_id].status != Status.DELETED.value
+        )
 
 
 class Post:
@@ -37,4 +39,6 @@ class Post:
 
     @staticmethod
     def is_valid_id(post_id):
-        return 0 <= post_id < len(POSTS) and POSTS[post_id].status != Status.DELETED.value
+        return (
+            0 <= post_id < len(POSTS) and POSTS[post_id].status != Status.DELETED.value
+        )

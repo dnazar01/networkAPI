@@ -25,7 +25,6 @@ def create_user():
     )
 
 
-
 @app.route("/users/<int:user_id>")
 def get_user(user_id):
     if not User.is_valid_id(user_id):
@@ -39,7 +38,6 @@ def get_user(user_id):
         total_reactions=user.total_reactions,
         posts=user.posts,
     )
-
 
 
 @app.route("/users/leaderboard")
