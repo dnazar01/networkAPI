@@ -5,7 +5,9 @@ from utils import (
     create_user_payload,
     create_reaction_payload,
 )
+
 ENDPOINT = "http://127.0.0.1:5000"
+
 
 def test_create_get_post():
     # прокинули запрос на создание пользователя, проверили что это можно сделать и создали

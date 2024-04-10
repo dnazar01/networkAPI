@@ -11,33 +11,33 @@ def create_user():
     first_name = request.json.get("first_name")
     last_name = request.json.get("last_name")
     email = request.json.get("email")
-    if User.is_email_valid(email):
-        user = User(len(USERS), first_name, last_name, email)
-        USERS.append(user)
-        return jsonify(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            email=user.email,
-            total_reactions=user.total_reactions,
-            posts=user.posts,
-        )
-    return Response(status=HTTPStatus.BAD_REQUEST)
+    if not User.is_email_valid(email):
+        return Response(status=HTTPStatus.BAD_REQUEST)
+    user = User(len(USERS), first_name, last_name, email)
+    USERS.append(user)
+    return jsonify(
+        id=user.id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        total_reactions=user.total_reactions,
+        posts=user.posts,
+    )
 
 
 @app.route("/users/<int:user_id>")
 def get_user(user_id):
-    if User.is_valid_id(user_id):
-        user = USERS[user_id]
-        return jsonify(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            email=user.email,
-            total_reactions=user.total_reactions,
-            posts=user.posts,
-        )
-    return Response(status=HTTPStatus.BAD_REQUEST)
+    if not User.is_valid_id(user_id):
+        return Response(status=HTTPStatus.BAD_REQUEST)
+    user = USERS[user_id]
+    return jsonify(
+        id=user.id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        total_reactions=user.total_reactions,
+        posts=user.posts,
+    )
 
 
 @app.route("/users/leaderboard")
@@ -96,16 +96,16 @@ def get_users_leaderboard():
 
 @app.delete("/users/<int:user_id>")
 def delete_user(user_id):
-    if User.is_valid_id(user_id):
-        user = USERS[user_id]
-        user.status = Status.DELETED.value
-        return jsonify(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            email=user.email,
-            total_reactions=user.total_reactions,
-            posts=user.posts,
-            status=user.status,
-        )
-    return Response(status=HTTPStatus.BAD_REQUEST)
+    if not User.is_valid_id(user_id):
+        return Response(status=HTTPStatus.BAD_REQUEST)
+    user = USERS[user_id]
+    user.status = Status.DELETED.value
+    return jsonify(
+        id=user.id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        total_reactions=user.total_reactions,
+        posts=user.posts,
+        status=user.status,
+    )
