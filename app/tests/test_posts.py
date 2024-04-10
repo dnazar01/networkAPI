@@ -3,7 +3,7 @@ from http import HTTPStatus
 from app.tests.utils import (
     create_post_payload,
     create_user_payload,
-    create_reaction_payload,
+    create_reaction_payload, to_specific_dict
 )
 from app.tests import ENDPOINT
 
@@ -23,16 +23,15 @@ def test_create_get_post():
     assert created_response.status_code == HTTPStatus.OK
 
     # проверили что он корректно создался и вернул правильные значения
-    assert created_response.json()["author_id"] == payload_for_post["author_id"]
-    assert created_response.json()["text"] == payload_for_post["text"]
+    assert to_specific_dict(created_response.json(), "author_id", "text") == payload_for_post
 
     # проверили что можем к нему обратиться по id
     post_id = created_response.json()["id"]
     get_response = requests.get(f"{ENDPOINT}/posts/{post_id}")
-    assert get_response.json()["id"] == post_id
-    assert get_response.json()["author_id"] == payload_for_post["author_id"]
-    assert get_response.json()["text"] == payload_for_post["text"]
-    assert isinstance(get_response.json()["reactions"], list)
+    get_response_json = get_response.json() # сделали одно обращение вместо 3
+
+    assert to_specific_dict(get_response_json, "author_id", "text") == payload_for_post
+    assert get_response_json["id"] == post_id and isinstance(get_response_json["reactions"], list)
 
     # удаляем пользователя
     delete_response = requests.delete(f"{ENDPOINT}/users/{user_id}")
@@ -40,17 +39,16 @@ def test_create_get_post():
 
     # удаляем пост и поверяем что нам вернулась нужная информация
     delete_response = requests.delete(f"{ENDPOINT}/posts/{post_id}")
-    assert delete_response.json()["id"] == post_id
-    assert delete_response.json()["author_id"] == payload_for_post["author_id"]
-    assert delete_response.json()["text"] == payload_for_post["text"]
-    assert isinstance(delete_response.json()["reactions"], list)
-    assert delete_response.json()["status"] == "deleted"
+    delete_response_json = delete_response.json()
+
+    assert to_specific_dict(delete_response_json, "author_id", "text") == payload_for_post
+    assert delete_response_json["id"] == post_id and delete_response_json["status"] == "deleted" and isinstance(delete_response_json["reactions"], list)
 
 
 def test_create_post_with_wrong_data():
     # неправильный id у автора
     payload = create_post_payload()
-    payload["author_id"] = 10**9
+    payload["author_id"] = 10 ** 9
     create_response = requests.post(f"{ENDPOINT}/posts/create", json=payload)
     assert create_response.status_code == HTTPStatus.BAD_REQUEST
 
@@ -68,7 +66,7 @@ def test_posting_reaction():
     created_response = requests.post(f"{ENDPOINT}/users/create", json=payload_for_user)
     assert created_response.status_code == HTTPStatus.OK
 
-    user_id_2 = created_response.json()["id"]
+    user_id_2 = created_response.json()["id"] # нет смысла выделять отдельный массив created_response_json так как каждый раз мы обращаемся к новому created_response
 
     # создать пост для первого пользователя
     payload_for_post = create_post_payload()
@@ -92,7 +90,7 @@ def test_posting_reaction():
 
     # проверка, что у самого поста теперь появилась реакция
     get_response = requests.get(f"{ENDPOINT}/posts/{post_id}")
-    assert get_response.json()["reactions"] == ["boom"]
+    assert get_response.json()["reactions"] == ["boom"] #то же новый запрос, нельзя соптимизировать
 
     # удаляем пользователей
     delete_response = requests.delete(f"{ENDPOINT}/users/{user_id_1}")
@@ -121,7 +119,7 @@ def test_all_posts():
             f"{ENDPOINT}/posts/create", json=payload_for_post
         )
         assert created_response.status_code == HTTPStatus.OK
-        all_posts_id.append(created_response.json()["id"])
+        all_posts_id.append(created_response.json()["id"]) # каждый раз новый запрос, нет смысла его запоминать в массив
 
     # запускаем везде нужное количество реакций
     n = 5
@@ -160,11 +158,12 @@ def test_all_posts():
     # cравниваем ожидания с реальностью, сортировка по возрастанию
     payload = {"sort": "desc"}
     created_response = requests.get(f"{ENDPOINT}/users/{user_id}/posts", json=payload)
+    created_response_json = created_response.json()
     assert created_response.status_code == HTTPStatus.OK
-    assert isinstance(created_response.json()["posts"], list)
+    assert isinstance(created_response_json["posts"], list)
 
     result_of_sort = [
-        len(post["reactions"]) for post in created_response.json()["posts"]
+        len(post["reactions"]) for post in created_response_json["posts"]
     ]
 
     # сразу проверяем по нужному количеству реакций

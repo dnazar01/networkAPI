@@ -1,6 +1,6 @@
 import requests, re
 from http import HTTPStatus
-from app.tests.utils import create_user_payload
+from app.tests.utils import create_user_payload, to_specific_dict
 from app.tests import ENDPOINT
 
 
@@ -8,25 +8,22 @@ def test_create_get_user():
     # прокинули запрос на создание пользователя, проверили что это можно сделать и создали
     payload = create_user_payload()
     created_response = requests.post(f"{ENDPOINT}/users/create", json=payload)
+    created_response_json = created_response.json()
     assert created_response.status_code == HTTPStatus.OK
 
     # проверяем что пользователь корректно создался
-    assert created_response.json()["first_name"] == payload["first_name"]
-    assert created_response.json()["last_name"] == payload["last_name"]
-    assert created_response.json()["email"] == payload["email"]
+    assert to_specific_dict(created_response_json, "first_name", "last_name", "email") == payload
 
     # проверяем что пользователя можно достать через /users/id
     user_id = created_response.json()["id"]
     get_response = requests.get(f"{ENDPOINT}/users/{user_id}")
-    assert get_response.json()["first_name"] == payload["first_name"]
-    assert get_response.json()["last_name"] == payload["last_name"]
-    assert get_response.json()["email"] == payload["email"]
+    assert to_specific_dict(get_response.json(), "first_name", "last_name", "email") == payload
 
     # удаляем и поверяем что нам вернулась нужная информация
     delete_response = requests.delete(f"{ENDPOINT}/users/{user_id}")
-    assert delete_response.json()["first_name"] == payload["first_name"]
-    assert delete_response.json()["last_name"] == payload["last_name"]
-    assert delete_response.json()["status"] == "deleted"
+    delete_response_json = delete_response.json()
+    assert to_specific_dict(delete_response_json,"first_name", "last_name") == to_specific_dict(payload, "first_name", "last_name")
+    assert delete_response_json["status"] == "deleted"
 
 
 def test_create_user_with_wrong_data():
@@ -49,8 +46,7 @@ def test_create_users_leaderboard_list():
     payload = {"type": "list", "sort": "asc"}
     get_response = requests.get(f"{ENDPOINT}/users/leaderboard", json=payload)
     leaderboard = get_response.json()["users"]
-    assert isinstance(leaderboard, list)
-    assert len(leaderboard) == n
+    assert isinstance(leaderboard, list) and len(leaderboard) == n
 
     for user_id in test_users:
         delete_response = requests.delete(f"{ENDPOINT}/users/{user_id}")

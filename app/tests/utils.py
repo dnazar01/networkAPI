@@ -11,3 +11,10 @@ def create_user_payload():
 
 def create_reaction_payload():
     return {"user_id": 0, "reaction": "boom"}
+
+
+def to_specific_dict(dictionary, *args):
+    new_dict = {}
+    for key in args:
+        new_dict[key] = dictionary[key]
+    return new_dict

@@ -61,7 +61,7 @@ def get_users_leaderboard():
         leaderboard_list.sort(key=lambda user: user["total_reactions"])
         if sort_type == SortType.ASCENDING.value:
             return jsonify(users=leaderboard_list)
-        if sort_type == SortType.DESCENDING.value:
+        elif sort_type == SortType.DESCENDING.value:
             return jsonify(users=leaderboard_list[::-1])
     if output_data_type == "graph":
         leaderboard_list = [
